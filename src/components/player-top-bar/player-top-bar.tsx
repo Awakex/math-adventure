@@ -15,7 +15,7 @@ const PlayerTopBar = (props: IProps) => {
     useEffect(() => {
         // @ts-ignore
         Animated.timing(translateXAnimation, {
-            toValue: -props.step * 60 + 60,
+            toValue: -props.step * 55 + 55,
             duration: 2000,
             useNativeDriver: true,
         }).start();
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: COLORS.ORANGE,
-        height: 50,
-        width: 50,
+        height: 35,
+        width: 45,
         borderRadius: 10,
         marginRight: 10,
         opacity: 0.5,

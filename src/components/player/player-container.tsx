@@ -8,9 +8,23 @@ import { Operations } from "../../enums/Operations";
 import { IPlanetConfig } from "../../interfaces/IPlanetConfig";
 import { IGeneratedRoom } from "../../interfaces/IGeneratedRoom";
 
+export const EmptyRoomContent = {
+    a: 0,
+    b: 0,
+    answers: [],
+    monster: {
+        health: 0,
+        rewardCoin: 0,
+        id: 0,
+        level: 0,
+        name: "",
+    },
+    operation: "0",
+};
+
 const PlayerContainer = () => {
     const { userStore } = useStores();
-    const [roomContent, setRoomContent] = useState<IGeneratedRoom | undefined>(undefined);
+    const [roomContent, setRoomContent] = useState<IGeneratedRoom>(EmptyRoomContent);
     const [topBarItems, setTopBarItems] = useState<any>([]);
     const [step, setStep] = useState(1);
 
@@ -23,16 +37,16 @@ const PlayerContainer = () => {
     }, [userStore.selectedPlanet]);
 
     useEffect(() => {
-        generateRoom(userStore.selectedPlanet);
+        setRoomContent(generateRoom(userStore.selectedPlanet, false));
     }, [step]);
 
     const generateTopBarItems = () => {
         setTopBarItems([...Array(userStore.selectedPlanet?.config.totalLands)]);
     };
 
-    const generateRoom = (planetData: IPlanet | undefined) => {
+    const generateRoom = (planetData: IPlanet | undefined, withoutMonsterGenerate: boolean) => {
         if (!planetData) {
-            return;
+            return EmptyRoomContent;
         }
 
         let planetConfig = planetData.config;
@@ -50,7 +64,14 @@ const PlayerContainer = () => {
             planetConfig.maximumNumber
         );
 
-        let generatedMonster: IMonster = generateMonster(step - 1, planetConfig);
+        let generatedMonster: IMonster;
+
+        if (!withoutMonsterGenerate) {
+            generatedMonster = generateMonster(step - 1, planetConfig);
+        } else {
+            generatedMonster = roomContent.monster;
+        }
+
         let answers = generateAnswers(generatedA, generatedB, generatedOperation, planetConfig);
 
         let convertedOperation =
@@ -64,13 +85,13 @@ const PlayerContainer = () => {
                 ? "/"
                 : "";
 
-        setRoomContent({
+        return {
             a: generatedA,
             b: generatedB,
             operation: convertedOperation,
             monster: generatedMonster,
             answers,
-        });
+        };
     };
 
     const generateAnswers = (
@@ -129,7 +150,9 @@ const PlayerContainer = () => {
             generatedMonster = availableBosses[getRandomValue(availableBosses.length)];
         } else {
             let availableMonsters = Monsters.filter(
-                (monster) => monster.level <= planetConfig.maximumMonsterLevel
+                (monster) =>
+                    monster.level <= planetConfig.maximumMonsterLevel &&
+                    monster.id !== roomContent?.monster.id
             );
             generatedMonster = availableMonsters[getRandomValue(availableMonsters.length)];
         }
@@ -139,8 +162,24 @@ const PlayerContainer = () => {
 
     const handleCheckAnswer = (answer: IAnswer) => {
         if (answer.isCorrect) {
-            setStep((prev) => step + 1);
+            let monsterHealth = roomContent?.monster.health;
+            let userAttack = getUserAttack();
+
+            if (monsterHealth && monsterHealth - userAttack > 0) {
+                let updatedContentRoom = generateRoom(userStore.selectedPlanet, true);
+                setRoomContent({
+                    ...updatedContentRoom,
+                    monster: { ...roomContent?.monster, health: monsterHealth - userAttack },
+                });
+            } else {
+                userStore.user.coins += roomContent?.monster.rewardCoin;
+                setStep((prev) => step + 1);
+            }
         }
+    };
+
+    const getUserAttack = () => {
+        return userStore.user.character.attack;
     };
 
     return (

@@ -6,6 +6,7 @@ export class UserStore {
     public user: IUser = {
         level: 0,
         name: "",
+        coins: 0,
         character: EmptyCharacter,
     };
 
@@ -49,6 +50,7 @@ export class UserStore {
         Promise.resolve().then(() => {
             this.user = {
                 level: 25,
+                coins: 25,
                 name: "AwakexDev",
                 character: Characters.find((character) => character.id === 2) || EmptyCharacter,
             };

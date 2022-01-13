@@ -28,7 +28,7 @@ const BottomTabsContainer: FC = () => {
             name: "AdventurePage",
             title: "Приключения",
             icon: "globe",
-            tabBarColor: COLORS.ORANGE,
+            tabBarColor: COLORS.GRAY,
         },
     ];
 

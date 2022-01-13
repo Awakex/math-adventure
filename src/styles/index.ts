@@ -6,4 +6,5 @@ export const COLORS = {
     SKY: "#36C7D0",
     PEACH: "#FFA48E",
     RED: "#FF0000",
+    GRAY: "#BDBDBD",
 };

@@ -3,4 +3,6 @@ interface IMonster {
     name: string;
     health: number;
     level: number;
+    rewardCoin: number;
+    imageSrc?: any;
 }

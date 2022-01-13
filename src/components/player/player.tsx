@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Image, StyleSheet, View } from "react-native";
 import { COLORS } from "../../styles";
 import CustomButton from "../custom-button/custom-button";
-import { useStores } from "../../hooks/useStores";
 import PlayerTopBar from "../player-top-bar/player-top-bar";
-import { useState } from "react";
 import { IGeneratedRoom } from "../../interfaces/IGeneratedRoom";
 import CustomText from "../custom-text/custom-text";
+import Header from "../header/header";
+import LottieView from "lottie-react-native";
 
 interface IProps {
     roomContent: IGeneratedRoom | undefined;
@@ -16,8 +16,8 @@ interface IProps {
 }
 
 const Player = (props: IProps) => {
-    const { userStore } = useStores();
     const [currentMonster, setCurrentMonster] = useState<IMonster | null>(null);
+    const backgroundAnimationRef = useRef(null);
 
     useEffect(() => {
         if (!props.roomContent) {
@@ -27,8 +27,24 @@ const Player = (props: IProps) => {
         setCurrentMonster(props.roomContent.monster);
     }, [props.step, props.roomContent]);
 
+    useEffect(() => {
+        // @ts-ignore
+        backgroundAnimationRef?.current?.play();
+    }, []);
+
     return (
         <View style={styles.container}>
+            <LottieView
+                source={require("../../../assets/animations/background3-forest.json")}
+                autoPlay={true}
+                loop={true}
+                speed={1}
+                resizeMode="cover"
+                ref={backgroundAnimationRef}
+            />
+
+            <Header styles={{ marginBottom: 5, marginTop: 35 }} />
+
             <PlayerTopBar
                 styles={{ width: "90%", marginTop: 5 }}
                 items={props.topBarItems}
@@ -37,14 +53,18 @@ const Player = (props: IProps) => {
 
             <View style={styles.player}>
                 <CustomText size={24} styles={{ marginTop: 15 }} center>
-                    {currentMonster?.name}
+                    {currentMonster?.name}{" "}
+                    <CustomText size={24} center color={COLORS.SKY}>
+                        (Ур: {currentMonster?.level})
+                    </CustomText>
                 </CustomText>
-                <CustomText size={18} center color={COLORS.SKY}>
-                    Уровень: {currentMonster?.level}
-                </CustomText>
-                <CustomText size={18} center color={COLORS.RED} styles={{ marginTop: 10 }}>
+
+                <CustomText size={28} center color={COLORS.RED} styles={{ marginTop: 5 }}>
                     Здоровье: {currentMonster?.health}
                 </CustomText>
+                {props.roomContent?.monster.imageSrc && (
+                    <Image style={styles.image} source={props.roomContent.monster.imageSrc} />
+                )}
             </View>
 
             <View style={styles.answersWrapper}>
@@ -80,11 +100,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        paddingTop: 50,
         backgroundColor: COLORS.BLACK,
     },
     player: {
         flex: 1,
+        alignItems: "center",
+    },
+    image: {
+        flex: 1,
+        width: 250,
+        height: "auto",
+        padding: 10,
+        marginBottom: 10,
+        resizeMode: "stretch",
     },
     answersWrapper: {
         alignItems: "center",
