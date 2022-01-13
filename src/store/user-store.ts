@@ -36,6 +36,21 @@ export class UserStore {
         makeAutoObservable(this);
     }
 
+    public getRewardByKillMonster = (monster: IMonster) => {
+        return {
+            coins: monster.rewardCoin,
+            experience: 0,
+        };
+    };
+
+    public getUserAttack = () => {
+        return {
+            attack: this.user.character.attack,
+            criticalMultiplier: 1,
+            isCritical: false,
+        };
+    };
+
     public getUserStats = () => {
         Promise.resolve().then(() => {
             this.stat = {

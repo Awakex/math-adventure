@@ -26,7 +26,23 @@ const PlayerContainer = () => {
     const { userStore } = useStores();
     const [roomContent, setRoomContent] = useState<IGeneratedRoom>(EmptyRoomContent);
     const [topBarItems, setTopBarItems] = useState<any>([]);
+
     const [step, setStep] = useState(1);
+
+    // REWARD OVERLAY
+    const [overlayIsOpen, setOverlayIsOpen] = useState(false);
+    const [overlayReward, setOverlayReward] = useState<IMonsterReward>({
+        coins: 0,
+        experience: 0,
+    });
+
+    // ATTACK OVERLAY
+    const [damageOverlayIsOpen, setDamageOverlayIsOpen] = useState(false);
+    const [damageOverlay, setDamageOverlay] = useState<IUserAttack>({
+        attack: 0,
+        criticalMultiplier: 1,
+        isCritical: false,
+    });
 
     useEffect(() => {
         if (userStore.selectedPlanet) {
@@ -163,23 +179,44 @@ const PlayerContainer = () => {
     const handleCheckAnswer = (answer: IAnswer) => {
         if (answer.isCorrect) {
             let monsterHealth = roomContent?.monster.health;
-            let userAttack = getUserAttack();
+            let userAttack = userStore.getUserAttack();
 
-            if (monsterHealth && monsterHealth - userAttack > 0) {
+            showDamage(userAttack);
+
+            if (monsterHealth && monsterHealth - userAttack.attack > 0) {
                 let updatedContentRoom = generateRoom(userStore.selectedPlanet, true);
                 setRoomContent({
                     ...updatedContentRoom,
-                    monster: { ...roomContent?.monster, health: monsterHealth - userAttack },
+                    monster: { ...roomContent?.monster, health: monsterHealth - userAttack.attack },
                 });
             } else {
+                showReward();
                 userStore.user.coins += roomContent?.monster.rewardCoin;
                 setStep((prev) => step + 1);
             }
         }
     };
 
-    const getUserAttack = () => {
-        return userStore.user.character.attack;
+    const showDamage = (attack: any) => {
+        setDamageOverlayIsOpen(true);
+        setDamageOverlay(attack);
+        setTimeout(() => {
+            setDamageOverlayIsOpen(false);
+            setDamageOverlay(attack);
+        }, 2500);
+    };
+
+    const showReward = () => {
+        setOverlayIsOpen(true);
+        let reward = userStore.getRewardByKillMonster(roomContent.monster);
+        setOverlayReward(reward);
+        setTimeout(() => {
+            setOverlayIsOpen(false);
+            setOverlayReward({
+                coins: 0,
+                experience: 0,
+            });
+        }, 2500);
     };
 
     return (
@@ -188,6 +225,10 @@ const PlayerContainer = () => {
             step={step}
             topBarItems={topBarItems}
             handleCheckAnswer={handleCheckAnswer}
+            overlayIsOpen={overlayIsOpen}
+            overlayReward={overlayReward}
+            damageOverlayIsOpen={damageOverlayIsOpen}
+            damageOverlay={damageOverlay}
         />
     );
 };

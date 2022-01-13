@@ -7,11 +7,16 @@ import { IGeneratedRoom } from "../../interfaces/IGeneratedRoom";
 import CustomText from "../custom-text/custom-text";
 import Header from "../header/header";
 import LottieView from "lottie-react-native";
+import InfoOverlay from "../info-overlay/info-overlay";
 
 interface IProps {
     roomContent: IGeneratedRoom | undefined;
     topBarItems: [];
     step: number;
+    overlayIsOpen: boolean;
+    overlayReward: IMonsterReward;
+    damageOverlayIsOpen: boolean;
+    damageOverlay: IUserAttack;
     handleCheckAnswer: (answer: IAnswer) => void;
 }
 
@@ -52,6 +57,37 @@ const Player = (props: IProps) => {
             />
 
             <View style={styles.player}>
+                {props.overlayIsOpen && (
+                    <InfoOverlay fromX={0} toX={100} styles={{ top: `25%` }} duration={1000}>
+                        <CustomText>+{props.overlayReward.coins} монет(ы)</CustomText>
+                        <CustomText>+{props.overlayReward.experience} опыта</CustomText>
+                    </InfoOverlay>
+                )}
+
+                {props.damageOverlayIsOpen && (
+                    <InfoOverlay fromX={0} toX={-100} styles={{ top: `45%` }} duration={1000}>
+                        <Image
+                            source={require("./../../../assets/images/effects/space-dust.png")}
+                            style={{ zIndex: 10, width: 150, height: 150 }}
+                        />
+
+                        <CustomText
+                            size={40}
+                            styles={{
+                                zIndex: 11,
+                                position: "absolute",
+                                top: 60,
+                                left: "30%",
+                                textShadowColor: "rgba(0, 0, 0, 1)",
+                                textShadowOffset: { width: 1, height: 1 },
+                                textShadowRadius: 10,
+                            }}
+                        >
+                            -{props.damageOverlay.attack}
+                        </CustomText>
+                    </InfoOverlay>
+                )}
+
                 <CustomText size={24} styles={{ marginTop: 15 }} center>
                     {currentMonster?.name}{" "}
                     <CustomText size={24} center color={COLORS.SKY}>
