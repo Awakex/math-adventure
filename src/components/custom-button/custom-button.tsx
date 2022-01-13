@@ -5,7 +5,7 @@ import CustomText from "../custom-text/custom-text";
 
 interface IProps {
     onPress: () => void;
-    title: string;
+    title: string | number;
     color?: string;
     isDisabled?: boolean;
     styles?: any;
